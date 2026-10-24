@@ -1,0 +1,71 @@
+/* ===== Paleta Food DEI (tomada del manual de marca) ===== */
+:root {
+  --fd-verde: #82b34a; /* Verde Fresco: sustentabilidad / sin desperdicio */
+  --fd-naranja: #ee7a31; /* Naranja Dinámico: tiempo / acción / apetito */
+  --fd-azul: #0f2d51; /* Azul Marino: tecnología / confianza */
+  --fd-amarillo: #e1bb50; /* Amarillo Arena: presupuesto / calidez */
+  --fd-blanco-roto: #f9f6ea; /* Blanco Roto: balance */
+
+  /* Tema de Bootstrap: los componentes (Badge, Alert, etc.) toman estos colores */
+  --bs-body-bg: var(--fd-blanco-roto);
+  --bs-body-color: var(--fd-azul);
+  --bs-dark-rgb: 15, 45, 81;
+  --bs-success-rgb: 130, 179, 74;
+  --bs-warning-rgb: 225, 187, 80;
+  --bs-warning-bg-subtle: #f8efd2;
+  --bs-warning-border-subtle: var(--fd-amarillo);
+  --bs-warning-text-emphasis: #5c4a10;
+}
+
+body {
+  background-color: var(--fd-blanco-roto);
+  color: var(--fd-azul);
+}
+
+/* Panel superior fijo */
+.panel-superior {
+  background-color: var(--fd-blanco-roto);
+  border-bottom: 3px solid var(--fd-verde);
+}
+
+.panel-superior img {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+
+/* Contador de tiempo */
+.badge-tiempo {
+  background-color: var(--fd-naranja) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge-tiempo-urgente {
+  background-color: var(--bs-danger) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Botón principal verde (reiniciar reserva) */
+.btn-success {
+  --bs-btn-bg: var(--fd-verde);
+  --bs-btn-border-color: var(--fd-verde);
+  --bs-btn-hover-bg: #6e9b3b;
+  --bs-btn-hover-border-color: #6e9b3b;
+  --bs-btn-active-bg: #6e9b3b;
+  --bs-btn-active-border-color: #6e9b3b;
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+}
+
+.bandeja-titulo {
+  background-color: var(--fd-azul);
+  color: var(--fd-blanco-roto);
+}
+
+.zona-pendiente {
+  border: 2px dashed var(--fd-amarillo);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  color: var(--fd-azul);
+  background-color: rgba(225, 187, 80, 0.12);
+}
