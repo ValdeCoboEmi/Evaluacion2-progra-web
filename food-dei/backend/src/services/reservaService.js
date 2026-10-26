@@ -86,6 +86,8 @@ function reiniciarReserva() {
   });
 }
 
+
+
 // ---------- Consultas y eliminación ----------
 
 // Misma estructura del enunciado ({ saldo, itemsReservados, total }) más estado y tiempo.
