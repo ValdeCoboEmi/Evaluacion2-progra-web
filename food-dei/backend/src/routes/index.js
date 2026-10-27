@@ -26,7 +26,6 @@ router.get('/reserva', reservaController.getReserva);
 router.post('/reserva/reiniciar', reservaController.reiniciar);
 router.delete('/reserva/eliminar/:id', reservaController.eliminarItem);
 router.post('/reserva/agregar', reservaController.agregarItem);
-
-// TODO PUT /reserva/actualizar-porciones/:id
+router.put('/reserva/actualizar-porciones/:id', reservaController.actualizarPorciones);
 
 module.exports = router;

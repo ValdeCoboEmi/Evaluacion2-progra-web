@@ -105,6 +105,45 @@ function agregarItem(id, cantidad) {
   });
 }
 
+// Cambia la cantidad de porciones de un ítem que ya está en la reserva.
+function actualizarPorciones(id, nuevaCantidad) {
+  if (reserva.estado === 'expirada') {
+    throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
+  }
+
+  const item = reserva.items.find((candidato) => candidato.id === id);
+
+  if (!item) {
+    throw crearError(404, `El platillo con id ${id} no existe en tu reserva.`);
+  }
+
+  const plato = menuService.buscarPlato(id);
+  const diferencia = nuevaCantidad - item.cantidad; // positivo = sube, negativo = baja
+
+  // Regla de negocio: el total nuevo no puede superar el saldo.
+  if (diferencia > 0) {
+    const totalNuevo = redondear(calcularTotal() + diferencia * plato.precio);
+
+    if (totalNuevo > reserva.saldoInicial) {
+      throw crearError(400, 'Saldo insuficiente para esta cantidad');
+    }
+  }
+
+  return ejecutarAtomico(() => {
+    let stock = plato.stock;
+
+    if (diferencia > 0) {
+      stock = menuService.tomarStock(id, diferencia);
+    } else if (diferencia < 0) {
+      stock = menuService.devolverStock(id, -diferencia);
+    }
+
+    item.cantidad = nuevaCantidad;
+
+    return { id, cantidad: nuevaCantidad, stock };
+  });
+}
+
 // ---------- Consultas y eliminación ----------
 
 // Misma estructura del enunciado ({ saldo, itemsReservados, total }) más estado y tiempo.
@@ -170,5 +209,6 @@ module.exports = {
   reiniciarReserva,
   obtenerVistaReserva,
   agregarItem,
+  actualizarPorciones,
   eliminarItem,
 };

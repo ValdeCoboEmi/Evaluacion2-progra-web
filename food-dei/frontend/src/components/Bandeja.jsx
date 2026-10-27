@@ -16,7 +16,9 @@ const moneda = (valor) => `$${Number(valor).toFixed(2)}`;
 //  estado: 'activa' | 'expirada'
 //  quitandoId: id del ítem que se está eliminando (o null)
 //  onQuitar(id), onReiniciar()
-function Bandeja({ items, estado, cargando, quitandoId, onQuitar, onReiniciar }) {
+function Bandeja({ items, estado, cargando, quitandoId, actualizandoId, onQuitar, onCambiarPorciones, onReiniciar }) {
+  // true mientras haya una petición en curso (evita clics repetidos)
+  const ocupado = quitandoId !== null || actualizandoId !== null;
   if (estado === 'expirada') {
     return (
       <Card>
@@ -62,24 +64,36 @@ function Bandeja({ items, estado, cargando, quitandoId, onQuitar, onReiniciar })
               </div>
 
               <div className="d-flex align-items-center gap-2">
-                {/* TODO: aquí va la lógica de PUT (actualizar cantidad)
-                    Responsable: Persona C. Conectar estos botones con
-                    PUT /api/reserva/actualizar-porciones/:id (quitar `disabled`
-                    y recibir un handler por props, igual que onQuitar). */}
-                <ButtonGroup size="sm">
-                  <Button outline color="secondary" disabled>
-                    -
-                  </Button>
-                  <Button outline color="secondary" disabled>
-                    +
-                  </Button>
-                </ButtonGroup>
+                {actualizandoId === item.id ? (
+                  <span className="small">
+                    <Spinner size="sm" /> Cargando...
+                  </span>
+                ) : (
+                  <ButtonGroup size="sm">
+                    <Button
+                      outline
+                      color="secondary"
+                      disabled={ocupado || item.cantidad <= 1}
+                      onClick={() => onCambiarPorciones(item.id, item.cantidad - 1)}
+                    >
+                      -
+                    </Button>
+                    <Button
+                      outline
+                      color="secondary"
+                      disabled={ocupado}
+                      onClick={() => onCambiarPorciones(item.id, item.cantidad + 1)}
+                    >
+                      +
+                    </Button>
+                  </ButtonGroup>
+                )}
 
                 <Button
                   color="danger"
                   outline
                   size="sm"
-                  disabled={quitandoId === item.id}
+                  disabled={ocupado}
                   onClick={() => onQuitar(item.id)}
                 >
                   {quitandoId === item.id ? <Spinner size="sm" /> : 'Quitar'}
