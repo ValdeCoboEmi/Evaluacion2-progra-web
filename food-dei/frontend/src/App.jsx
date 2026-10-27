@@ -198,7 +198,9 @@ const actualizarPorciones = async (id, nuevaCantidad) => {
               estado={reserva.estado}
               cargando={cargando}
               quitandoId={quitandoId}
+              actualizandoId={actualizandoId}
               onQuitar={quitarItem}
+              onCambiarPorciones={actualizarPorciones}
               onReiniciar={reiniciarReserva}
             />
           </Col>
