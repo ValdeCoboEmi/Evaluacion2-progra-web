@@ -40,6 +40,7 @@ function App() {
   const [cargando, setCargando] = useState(true);
   const [quitandoId, setQuitandoId] = useState(null);
   const [agregandoId, setAgregandoId] = useState(null);
+  const [actualizandoId, setActualizandoId] = useState(null);
   const [error, setError] = useState(null);
 
   const mostrarError = (mensaje) => setError({ id: Date.now(), mensaje });
@@ -113,6 +114,28 @@ const agregarPlato = async (alimentoId) => {
       setQuitandoId(null);
     }
   };
+
+  // PUT /api/reserva/actualizar-porciones/:id  (Endpoint 4)
+const actualizarPorciones = async (id, nuevaCantidad) => {
+  setActualizandoId(id);
+  setError(null);
+
+  try {
+    const resultado = await request(`/reserva/actualizar-porciones/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cantidad: nuevaCantidad }),
+    });
+
+    aplicarReserva(resultado.reserva);
+    setMenu(await request('/menu')); // el stock visual del menú cambia
+  } catch (fallo) {
+    mostrarError(fallo.message); // aquí llega "Saldo insuficiente para esta cantidad"
+    await cargarDatos();
+  } finally {
+    setActualizandoId(null);
+  }
+};
 
   // El contador llegó a 0: se consulta al servidor, que libera el stock y marca la reserva expirada.
   const manejarExpiracion = async () => {
