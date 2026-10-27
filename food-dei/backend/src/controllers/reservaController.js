@@ -1,11 +1,12 @@
 const reservaService = require('../services/reservaService');
 
-// GET /api/reserva  (versión mínima; cambiarlo al que le toca)
+// GET /api/reserva  -> { saldo, itemsReservados, total, estado, segundosRestantes }
 function getReserva(req, res, next) {
   try {
     return res.json(reservaService.obtenerVistaReserva());
   } catch (error) {
-    return next(error);
+    console.error('[GET /api/reserva]', error);
+    return next(reservaService.crearError(500, 'No se pudo obtener tu reserva.'));
   }
 }
 
