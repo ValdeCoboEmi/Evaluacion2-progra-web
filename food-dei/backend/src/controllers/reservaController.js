@@ -43,6 +43,38 @@ function agregarItem(req, res, next) {
   }
 }
 
+// PUT /api/reserva/actualizar-porciones/:id   body: { cantidad }
+function actualizarPorciones(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const cantidad = Number(req.body?.cantidad);
+
+    if (!Number.isInteger(id) || id < 1 || !Number.isInteger(cantidad) || cantidad < 1) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'El id y la cantidad deben ser números enteros positivos.',
+      });
+    }
+
+    const actualizado = reservaService.actualizarPorciones(id, cantidad);
+
+    return res.json({
+      message: 'Porciones actualizadas.',
+      actualizado,
+      reserva: reservaService.obtenerVistaReserva(),
+    });
+  } catch (error) {
+    if (error.status) {
+      return next(error);
+    }
+
+    console.error('[PUT /api/reserva/actualizar-porciones/:id]', error);
+    return next(
+      reservaService.crearError(500, 'No se pudieron actualizar las porciones. Intenta de nuevo.'),
+    );
+  }
+}
+
 // DELETE /api/reserva/eliminar/:id
 function eliminarItem(req, res, next) {
   try {
@@ -92,4 +124,4 @@ function reiniciar(req, res, next) {
   }
 }
 
-module.exports = { getReserva, agregarItem, eliminarItem, reiniciar };
+module.exports = { getReserva, agregarItem, actualizarPorciones, eliminarItem, reiniciar };
