@@ -9,6 +9,39 @@ function getReserva(req, res, next) {
   }
 }
 
+// POST /api/reserva/agregar   body: { alimentoId, cantidad }
+function agregarItem(req, res, next) {
+  try {
+    const { alimentoId, cantidad } = req.body ?? {};
+    const id = Number(alimentoId);
+    const unidades = Number(cantidad);
+
+    if (!Number.isInteger(id) || id < 1 || !Number.isInteger(unidades) || unidades < 1) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'alimentoId y cantidad deben ser números enteros positivos.',
+      });
+    }
+
+    const agregado = reservaService.agregarItem(id, unidades);
+
+    return res.status(201).json({
+      message: 'Platillo agregado a tu reserva.',
+      agregado,
+      reserva: reservaService.obtenerVistaReserva(),
+    });
+  } catch (error) {
+    if (error.status) {
+      return next(error);
+    }
+
+    console.error('[POST /api/reserva/agregar]', error);
+    return next(
+      reservaService.crearError(500, 'No se pudo agregar el platillo. Intenta de nuevo.'),
+    );
+  }
+}
+
 // DELETE /api/reserva/eliminar/:id
 function eliminarItem(req, res, next) {
   try {
@@ -58,4 +91,4 @@ function reiniciar(req, res, next) {
   }
 }
 
-module.exports = { getReserva, eliminarItem, reiniciar };
+module.exports = { getReserva, agregarItem, eliminarItem, reiniciar };

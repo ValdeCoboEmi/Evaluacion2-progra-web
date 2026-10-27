@@ -86,6 +86,25 @@ function reiniciarReserva() {
   });
 }
 
+function agregarItem(id, cantidad) {
+  if (reserva.estado === 'expirada') {
+    throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
+  }
+
+  return ejecutarAtomico(() => {
+    const stock = menuService.tomarStock(id, cantidad);
+    const existente = reserva.items.find((item) => item.id === id);
+
+    if (existente) {
+      existente.cantidad += cantidad;
+    } else {
+      reserva.items.push({ id, cantidad });
+    }
+
+    return { id, cantidad, stock };
+  });
+}
+
 // ---------- Consultas y eliminación ----------
 
 // Misma estructura del enunciado ({ saldo, itemsReservados, total }) más estado y tiempo.
@@ -150,5 +169,6 @@ module.exports = {
   liberarSiExpirada,
   reiniciarReserva,
   obtenerVistaReserva,
+  agregarItem,
   eliminarItem,
 };

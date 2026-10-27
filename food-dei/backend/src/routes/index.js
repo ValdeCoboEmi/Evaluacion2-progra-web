@@ -25,8 +25,8 @@ router.get('/menu', menuController.getMenu);
 router.get('/reserva', reservaController.getReserva);
 router.post('/reserva/reiniciar', reservaController.reiniciar);
 router.delete('/reserva/eliminar/:id', reservaController.eliminarItem);
+router.post('/reserva/agregar', reservaController.agregarItem);
 
-// TODO POST /reserva/agregar
 // TODO PUT /reserva/actualizar-porciones/:id
 
 module.exports = router;
