@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'reactstrap';
 import PanelSuperior from './components/PanelSuperior';
 import Bandeja from './components/Bandeja';
+import Menu from './components/Menu';
 import AlertaError from './components/AlertaError';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -38,6 +39,7 @@ function App() {
   const [expiraEn, setExpiraEn] = useState(0); // timestamp local en que vence la reserva
   const [cargando, setCargando] = useState(true);
   const [quitandoId, setQuitandoId] = useState(null);
+  const [agregandoId, setAgregandoId] = useState(null);
   const [error, setError] = useState(null);
 
   const mostrarError = (mensaje) => setError({ id: Date.now(), mensaje });
@@ -71,6 +73,28 @@ function App() {
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  // POST /api/reserva/agregar  (Endpoint 3)
+const agregarPlato = async (alimentoId) => {
+  setAgregandoId(alimentoId);
+  setError(null);
+
+  try {
+    const resultado = await request('/reserva/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alimentoId, cantidad: 1 }),
+    });
+
+    aplicarReserva(resultado.reserva);
+    setMenu(await request('/menu'));
+  } catch (fallo) {
+    mostrarError(fallo.message);
+    await cargarDatos();
+  } finally {
+    setAgregandoId(null);
+  }
+};
 
   // DELETE /api/reserva/eliminar/:id
   const quitarItem = async (id) => {
@@ -137,11 +161,14 @@ function App() {
 
         <Row className="mt-3">
           <Col xs="12" lg="8" className="mb-3">
-            {/* TODO (Persona B): aquí va el Menú del Día, por ejemplo:
-                <Menu menu={menu} onAgregado={cargarDatos} /> */}
-            <div className="zona-pendiente">Menú del Día: pendiente de integrar (Persona B).</div>
+            <Menu
+             menu={menu}
+             estado={reserva.estado}
+             cargando={cargando}
+             agregandoId={agregandoId}
+             onAgregar={agregarPlato}
+            />
           </Col>
-
           <Col xs="12" lg="4">
             <Bandeja
               items={itemsDetallados}
