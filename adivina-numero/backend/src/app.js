@@ -22,6 +22,10 @@ function createApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use('/api', routes);
 
+  app.use((req, res) => {
+    res.status(404).json({ status: 'error', message: 'Ruta no encontrada.' });
+  });
+
   // eslint-disable-next-line no-unused-vars
   app.use((error, req, res, next) => {
     res.status(error.status || 500).json({
