@@ -64,24 +64,30 @@ function Bandeja({ items, estado, cargando, quitandoId, actualizandoId, onQuitar
               </div>
 
               <div className="d-flex align-items-center gap-2">
-                <ButtonGroup size="sm">
-                  <Button
-                    outline
-                    color="secondary"
-                    disabled={ocupado || item.cantidad <= 1}
-                    onClick={() => onCambiarPorciones(item.id, item.cantidad - 1)}
-                  >
-                    -
-                  </Button>
-                  <Button
-                    outline
-                    color="secondary"
-                    disabled={ocupado}
-                    onClick={() => onCambiarPorciones(item.id, item.cantidad + 1)}
-                  >
-                    +
-                  </Button>
-                </ButtonGroup>
+                {actualizandoId === item.id ? (
+                  <span className="small">
+                    <Spinner size="sm" /> Cargando...
+                  </span>
+                ) : (
+                  <ButtonGroup size="sm">
+                    <Button
+                      outline
+                      color="secondary"
+                      disabled={ocupado || item.cantidad <= 1}
+                      onClick={() => onCambiarPorciones(item.id, item.cantidad - 1)}
+                    >
+                      -
+                    </Button>
+                    <Button
+                      outline
+                      color="secondary"
+                      disabled={ocupado}
+                      onClick={() => onCambiarPorciones(item.id, item.cantidad + 1)}
+                    >
+                      +
+                    </Button>
+                  </ButtonGroup>
+                )}
 
                 <Button
                   color="danger"
