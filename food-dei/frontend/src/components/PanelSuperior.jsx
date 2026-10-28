@@ -3,7 +3,6 @@ import Temporizador from './Temporizador';
 
 const moneda = (valor) => `$${Number(valor).toFixed(2)}`;
 
-// Panel fijo: logo, saldo disponible, total de la reserva y tiempo restante.
 function PanelSuperior({ saldo, total, estado, expiraEn, onExpira }) {
   return (
     <Navbar light sticky="top" container="lg" className="panel-superior shadow-sm">
@@ -21,7 +20,7 @@ function PanelSuperior({ saldo, total, estado, expiraEn, onExpira }) {
             {moneda(total)}
           </Badge>
         </span>
-        <Temporizador expiraEn={expiraEn} activa={estado === 'activa'} onExpira={onExpira} />
+        <Temporizador expiraEn={expiraEn} estado={estado} onExpira={onExpira} />
       </div>
     </Navbar>
   );
