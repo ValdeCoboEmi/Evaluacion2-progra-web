@@ -120,13 +120,21 @@ function reiniciarReserva() {
 }
 
 // Agrega a ka reserva.
+// Errores: 409 expirada/confirmada, 404 no existe, 400 stock o saldo insuficiente.
 function agregarItem(id, cantidad) {
-  if (reserva.estado === 'expirada') {
-    throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
-  }
+  validarActiva();
 
   return ejecutarAtomico(() => {
     const stock = menuService.tomarStock(id, cantidad);
+
+    // el total nuevo no puede superar el saldo.
+    const plato = menuService.buscarPlato(id);
+    const totalNuevo = redondear(calcularTotal() + plato.precio * cantidad);
+
+    if (totalNuevo > reserva.saldoInicial) {
+      throw crearError(400, 'Saldo insuficiente para esta cantidad');
+    }
+
     const existente = reserva.items.find((item) => item.id === id);
 
     if (existente) {
@@ -153,7 +161,7 @@ function actualizarPorciones(id, nuevaCantidad) {
   const plato = menuService.buscarPlato(id);
   const diferencia = nuevaCantidad - item.cantidad; // positivo = sube, negativo = baja
 
-  // Regla de negocio: el total nuevo no puede superar el saldo.
+  //  el total nuevo no puede superar el saldo.
   if (diferencia > 0) {
     const totalNuevo = redondear(calcularTotal() + diferencia * plato.precio);
 
