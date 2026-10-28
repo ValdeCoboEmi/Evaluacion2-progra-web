@@ -1,9 +1,11 @@
 const menuService = require('../services/menuService');
 
-// GET /api/menu  (versión mínima para que el frontend funcione, cambiarlo al que le toca)
+// GET /api/menu
+//  200 OK -> [{ id, nombre, precio, stock, categoria }, ...]
+//  500    -> error interno 
 function getMenu(req, res, next) {
   try {
-    return res.json(menuService.obtenerMenu());
+    return res.status(200).json(menuService.obtenerMenu());
   } catch (error) {
     return next(error);
   }

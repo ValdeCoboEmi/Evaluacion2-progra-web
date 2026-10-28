@@ -1,6 +1,7 @@
 const menuService = require('./menuService');
+const { crearError } = require('../utils/errores');
 
-// Tiempo máximo de la reserva (segundos). Se puede cambiar en backend/.env
+// Tiempo máximo de la reserva (segundos) y saldo del usuario. Se pueden cambiar en backend/.env
 const TTL_SEGUNDOS = Number(process.env.RESERVA_TTL_SEGUNDOS) || 300;
 const SALDO_INICIAL = Number(process.env.SALDO_INICIAL) || 25;
 
@@ -8,20 +9,16 @@ const SALDO_INICIAL = Number(process.env.SALDO_INICIAL) || 25;
 const reserva = {
   saldoInicial: SALDO_INICIAL,
   items: [], // [{ id, cantidad }]
-  estado: 'activa', // 'activa' | 'expirada'
+  estado: 'activa', // 'activa' | 'expirada' | 'confirmada'
   expiraEn: 0, // timestamp (ms)
 };
 
 // ---------- Utilidades ----------
 
-function crearError(status, message) {
-  const error = new Error(message);
-  error.status = status;
-  return error;
-}
-
+// Redondea a 2 decimales para evitar errores de coma flotante (ej. 0.1 + 0.2).
 const redondear = (numero) => Math.round(numero * 100) / 100;
 
+// Total de la reserva = suma de precio * cantidad de cada ítem (reduce sobre el arreglo).
 function calcularTotal() {
   const total = reserva.items.reduce((acumulado, item) => {
     const plato = menuService.buscarPlato(item.id);
@@ -50,9 +47,21 @@ function ejecutarAtomico(operacion) {
   }
 }
 
+// Marca la reserva como activa y fija el momento en que vence.
 function iniciarVentanaDeTiempo() {
   reserva.estado = 'activa';
   reserva.expiraEn = Date.now() + TTL_SEGUNDOS * 1000;
+}
+
+// Solo se puede modificar una reserva activa. 409 Conflict si ya expiró o ya se confirmó.
+function validarActiva() {
+  if (reserva.estado === 'expirada') {
+    throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
+  }
+
+  if (reserva.estado === 'confirmada') {
+    throw crearError(409, 'Tu reserva ya fue confirmada. Inicia una nueva reserva para continuar.');
+  }
 }
 
 // ---------- Expiración ----------
@@ -77,6 +86,30 @@ function liberarSiExpirada() {
   return true;
 }
 
+// Confirma la reserva: el stock queda bloqueado definitivamente (ya no vuelve al menú)
+// y el total se descuenta del saldo del usuario para las próximas reservas.
+// Errores: 409 si ya expiró o ya estaba confirmada, 400 si la reserva está vacía.
+function confirmarReserva() {
+  validarActiva();
+
+  if (reserva.items.length === 0) {
+    throw crearError(400, 'Tu reserva está vacía. Agrega al menos un platillo para confirmar.');
+  }
+
+  return ejecutarAtomico(() => {
+    const confirmada = {
+      items: reserva.items.map((item) => ({ ...item })),
+      total: calcularTotal(),
+    };
+
+    reserva.saldoInicial = redondear(reserva.saldoInicial - confirmada.total); // el gasto es definitivo
+    reserva.items = []; // NO se devuelve stock: los platillos quedaron reservados
+    reserva.estado = 'confirmada';
+
+    return confirmada;
+  });
+}
+
 // Inicia una reserva nueva. Si había ítems activos, devuelve sus unidades al stock.
 function reiniciarReserva() {
   ejecutarAtomico(() => {
@@ -86,6 +119,7 @@ function reiniciarReserva() {
   });
 }
 
+// Agrega a ka reserva.
 function agregarItem(id, cantidad) {
   if (reserva.estado === 'expirada') {
     throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
@@ -106,10 +140,9 @@ function agregarItem(id, cantidad) {
 }
 
 // Cambia la cantidad de porciones de un ítem que ya está en la reserva.
+// Errores: 409 expirada/confirmada, 404 no está en la reserva, 400 saldo o stock insuficiente.
 function actualizarPorciones(id, nuevaCantidad) {
-  if (reserva.estado === 'expirada') {
-    throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
-  }
+  validarActiva();
 
   const item = reserva.items.find((candidato) => candidato.id === id);
 
@@ -165,10 +198,9 @@ function obtenerVistaReserva() {
 }
 
 // Elimina el platillo de la reserva y devuelve sus unidades al stock (atómico).
+// Errores: 409 reserva expirada/confirmada, 404 el platillo no está en la reserva.
 function eliminarItem(id) {
-  if (reserva.estado === 'expirada') {
-    throw crearError(409, 'Tu reserva expiró. Inicia una nueva reserva para continuar.');
-  }
+  validarActiva();
 
   const indice = reserva.items.findIndex((item) => item.id === id);
 
@@ -184,27 +216,11 @@ function eliminarItem(id) {
   });
 }
 
-// ---------- Datos de demostración (solo si DEMO_SEED=true en .env) ----------
-// Precarga 2 ítems para poder probar la eliminación mientras B no tenga POST /agregar.
-// Borrar este bloque (y DEMO_SEED del .env) cuando el equipo integre todo.
-function sembrarDemo() {
-  [
-    { id: 101, cantidad: 2 },
-    { id: 102, cantidad: 1 },
-  ].forEach((item) => {
-    menuService.tomarStock(item.id, item.cantidad);
-    reserva.items.push(item);
-  });
-}
-
+// Al arrancar el servidor ya existe una reserva activa con su cuenta regresiva.
 iniciarVentanaDeTiempo();
 
-if (process.env.DEMO_SEED === 'true') {
-  sembrarDemo();
-}
-
 module.exports = {
-  crearError,
+  confirmarReserva,
   liberarSiExpirada,
   reiniciarReserva,
   obtenerVistaReserva,

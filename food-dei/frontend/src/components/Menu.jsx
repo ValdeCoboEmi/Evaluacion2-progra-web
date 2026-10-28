@@ -12,6 +12,7 @@ import {
 
 const moneda = (valor) => `$${Number(valor).toFixed(2)}`;
 
+// Catálogo del menú
 function Menu({ menu, estado, cargando, agregandoId, onAgregar }) {
   if (cargando) {
     return (
@@ -26,6 +27,7 @@ function Menu({ menu, estado, cargando, agregandoId, onAgregar }) {
       <h2 className="h4 mb-3">Menú del Día</h2>
 
       <Row>
+        {/* .map recorre el arreglo y crea una tarjeta por plato (key = id único) */}
         {menu.map((plato) => {
           const agotado = plato.stock === 0;
           const agregando = agregandoId === plato.id;
@@ -50,7 +52,7 @@ function Menu({ menu, estado, cargando, agregandoId, onAgregar }) {
                     ) : (
                       <Button
                         color="success"
-                        disabled={estado === 'expirada' || agregandoId !== null}
+                        disabled={estado !== 'activa' || agregandoId !== null}
                         onClick={() => onAgregar(plato.id)}
                       >
                         {agregando ? <Spinner size="sm" /> : 'Añadir a la Reserva'}

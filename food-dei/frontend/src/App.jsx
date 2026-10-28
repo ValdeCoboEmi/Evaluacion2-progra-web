@@ -5,10 +5,9 @@ import Bandeja from './components/Bandeja';
 import Menu from './components/Menu';
 import AlertaError from './components/AlertaError';
 
-const API_URL = import.meta.env.VITE_API_URL;
+// URL base de la API
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3006/api';
 
-// Petición al backend con promesas (async/await). Si el servidor rechaza la petición
-// (404, 409, 400...) lanza un Error con el mensaje de la regla de negocio.
 async function request(path, options) {
   let response;
 
@@ -27,6 +26,7 @@ async function request(path, options) {
   return data;
 }
 
+// Componente raíz: guarda el estado global (menú, reserva, errores) y reparte funciones a los hijos.
 function App() {
   const [menu, setMenu] = useState([]);
   const [reserva, setReserva] = useState({
@@ -41,12 +41,12 @@ function App() {
   const [quitandoId, setQuitandoId] = useState(null);
   const [agregandoId, setAgregandoId] = useState(null);
   const [actualizandoId, setActualizandoId] = useState(null);
+  const [confirmando, setConfirmando] = useState(false);
   const [error, setError] = useState(null);
 
   const mostrarError = (mensaje) => setError({ id: Date.now(), mensaje });
 
   // Guarda la reserva y calcula cuándo vence usando los segundos que informa el servidor
-  // (así no dependemos de que el reloj del navegador coincida con el del servidor).
   const aplicarReserva = (datos) => {
     setReserva(datos);
     setExpiraEn(Date.now() + datos.segundosRestantes * 1000);
@@ -71,33 +71,34 @@ function App() {
     }
   };
 
+  // Al abrir la página (GET /api/menu y GET /api/reserva = Endpoints 1 y 2).
   useEffect(() => {
     cargarDatos();
   }, []);
 
-  // POST /api/reserva/agregar  (Endpoint 3)
-const agregarPlato = async (alimentoId) => {
-  setAgregandoId(alimentoId);
-  setError(null);
+  // POST /api/reserva/agregar  (Endpoint 3). Responde 201; si falta stock o saldo, 400 -> catch.
+  const agregarPlato = async (alimentoId) => {
+    setAgregandoId(alimentoId);
+    setError(null);
 
-  try {
-    const resultado = await request('/reserva/agregar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ alimentoId, cantidad: 1 }),
-    });
+    try {
+      const resultado = await request('/reserva/agregar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alimentoId, cantidad: 1 }),
+      });
 
-    aplicarReserva(resultado.reserva);
-    setMenu(await request('/menu'));
-  } catch (fallo) {
-    mostrarError(fallo.message);
-    await cargarDatos();
-  } finally {
-    setAgregandoId(null);
-  }
-};
+      aplicarReserva(resultado.reserva);
+      setMenu(await request('/menu'));
+    } catch (fallo) {
+      mostrarError(fallo.message);
+      await cargarDatos();
+    } finally {
+      setAgregandoId(null);
+    }
+  };
 
-  // DELETE /api/reserva/eliminar/:id
+  // DELETE /api/reserva/eliminar/:id  (Endpoint 5). Responde 200; si no existe en la reserva, 404 -> catch.
   const quitarItem = async (id) => {
     setQuitandoId(id);
     setError(null);
@@ -115,27 +116,27 @@ const agregarPlato = async (alimentoId) => {
     }
   };
 
-  // PUT /api/reserva/actualizar-porciones/:id  (Endpoint 4)
-const actualizarPorciones = async (id, nuevaCantidad) => {
-  setActualizandoId(id);
-  setError(null);
+  // PUT /api/reserva/actualizar-porciones/:id  (Endpoint 4). Responde 200; 400 si no hay saldo o stock.
+  const actualizarPorciones = async (id, nuevaCantidad) => {
+    setActualizandoId(id);
+    setError(null);
 
-  try {
-    const resultado = await request(`/reserva/actualizar-porciones/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cantidad: nuevaCantidad }),
-    });
+    try {
+      const resultado = await request(`/reserva/actualizar-porciones/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cantidad: nuevaCantidad }),
+      });
 
-    aplicarReserva(resultado.reserva);
-    setMenu(await request('/menu')); // el stock visual del menú cambia
-  } catch (fallo) {
-    mostrarError(fallo.message); // aquí llega "Saldo insuficiente para esta cantidad"
-    await cargarDatos();
-  } finally {
-    setActualizandoId(null);
-  }
-};
+      aplicarReserva(resultado.reserva);
+      setMenu(await request('/menu')); // el stock visual del menú cambia
+    } catch (fallo) {
+      mostrarError(fallo.message); // aquí llega "Saldo insuficiente para esta cantidad"
+      await cargarDatos();
+    } finally {
+      setActualizandoId(null);
+    }
+  };
 
   // El contador llegó a 0: se consulta al servidor, que libera el stock y marca la reserva expirada.
   const manejarExpiracion = async () => {
@@ -146,12 +147,33 @@ const actualizarPorciones = async (id, nuevaCantidad) => {
     }
   };
 
-  // POST /api/reserva/reiniciar
+  // POST /api/reserva/confirmar. Bloquea el stock y descuenta el saldo; responde 200.
+  // Si la reserva está vacía responde 400 y el mensaje se muestra en <AlertaError>.
+  const confirmarReserva = async () => {
+    setConfirmando(true);
+    setError(null);
+
+    try {
+      const resultado = await request('/reserva/confirmar', { method: 'POST' });
+
+      aplicarReserva(resultado.reserva);
+      setMenu(await request('/menu'));
+    } catch (fallo) {
+      mostrarError(fallo.message);
+      await cargarDatos();
+    } finally {
+      setConfirmando(false);
+    }
+  };
+
+  // POST /api/reserva/reiniciar. Inicia una reserva nueva cuando la anterior expiró o se confirmó.
   const reiniciarReserva = async () => {
     setError(null);
 
     try {
-      aplicarReserva(await request('/reserva/reiniciar', { method: 'POST' }));
+      const resultado = await request('/reserva/reiniciar', { method: 'POST' });
+
+      aplicarReserva(resultado.reserva);
       setMenu(await request('/menu'));
     } catch (fallo) {
       mostrarError(fallo.message);
@@ -185,11 +207,11 @@ const actualizarPorciones = async (id, nuevaCantidad) => {
         <Row className="mt-3">
           <Col xs="12" lg="8" className="mb-3">
             <Menu
-             menu={menu}
-             estado={reserva.estado}
-             cargando={cargando}
-             agregandoId={agregandoId}
-             onAgregar={agregarPlato}
+              menu={menu}
+              estado={reserva.estado}
+              cargando={cargando}
+              agregandoId={agregandoId}
+              onAgregar={agregarPlato}
             />
           </Col>
           <Col xs="12" lg="4">
@@ -202,6 +224,8 @@ const actualizarPorciones = async (id, nuevaCantidad) => {
               onQuitar={quitarItem}
               onCambiarPorciones={actualizarPorciones}
               onReiniciar={reiniciarReserva}
+              onConfirmar={confirmarReserva}
+              confirmando={confirmando}
             />
           </Col>
         </Row>

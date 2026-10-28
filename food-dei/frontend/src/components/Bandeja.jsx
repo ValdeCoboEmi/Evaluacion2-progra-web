@@ -9,23 +9,36 @@ import {
   Spinner,
 } from 'reactstrap';
 
+// Formatea un número como dinero: 5.5 -> "$5.50"
 const moneda = (valor) => `$${Number(valor).toFixed(2)}`;
 
 // Carrito lateral. Props:
 //  items: [{ id, nombre, precio, cantidad }]
-//  estado: 'activa' | 'expirada'
+//  estado: 'activa' | 'expirada' | 'confirmada'
 //  quitandoId: id del ítem que se está eliminando (o null)
-//  onQuitar(id), onReiniciar()
-function Bandeja({ items, estado, cargando, quitandoId, actualizandoId, onQuitar, onCambiarPorciones, onReiniciar }) {
+//  onQuitar(id)  -> Endpoint 5 (DELETE)
+//  onCambiarPorciones(id, nuevaCantidad) -> Endpoint 4 (PUT), botones - y +
+//  onConfirmar() -> POST /reserva/confirmar (bloquea el stock y descuenta el saldo)
+//  onReiniciar() -> inicia una reserva nueva cuando la anterior expiró o fue confirmada
+function Bandeja({
+  items, estado, cargando, quitandoId, actualizandoId, confirmando,
+  onQuitar, onCambiarPorciones, onReiniciar, onConfirmar,
+}) {
   // true mientras haya una petición en curso (evita clics repetidos)
-  const ocupado = quitandoId !== null || actualizandoId !== null;
-  if (estado === 'expirada') {
+  const ocupado = quitandoId !== null || actualizandoId !== null || confirmando;
+
+  // Reserva expirada o confirmada: no se puede editar; se invita a iniciar otra.
+  if (estado !== 'activa') {
+    const confirmada = estado === 'confirmada';
+
     return (
       <Card>
         <CardHeader className="bandeja-titulo">Tu Bandeja de Reserva</CardHeader>
         <CardBody>
           <p className="mb-3">
-            Tu reserva expiró y los platillos volvieron al stock. Puedes iniciar una nueva.
+            {confirmada
+              ? '¡Reserva confirmada! Tus platillos quedaron apartados y el total se descontó de tu saldo. Puedes hacer otra reserva.'
+              : 'Tu reserva expiró y los platillos volvieron al stock. Puedes iniciar una nueva.'}
           </p>
           <Button color="success" onClick={onReiniciar}>
             Iniciar nueva reserva
@@ -102,6 +115,15 @@ function Bandeja({ items, estado, cargando, quitandoId, actualizandoId, onQuitar
             </ListGroupItem>
           ))}
         </ListGroup>
+      )}
+
+      {/* Confirmar: solo aparece si hay platos en la reserva */}
+      {!cargando && items.length > 0 && (
+        <CardBody>
+          <Button color="success" block disabled={ocupado} onClick={onConfirmar}>
+            {confirmando ? <Spinner size="sm" /> : 'Confirmar reserva'}
+          </Button>
+        </CardBody>
       )}
     </Card>
   );
