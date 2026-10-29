@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Badge, Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
+import { Badge, Button, Card, CardBody, Col, Container, Row } from 'reactstrap';
 import GuessForm from '../components/GuessForm';
 import GuessHistory from '../components/GuessHistory';
 import { resetGame, sendGuess } from '../services/guessApi';
@@ -66,60 +66,72 @@ function HomePage() {
 
   return (
     <Container className="game mt-4 mb-5">
-      <h1 className="mb-3">Adivina el Número</h1>
+      <h1 className="game-title mb-4">Adivina el Número</h1>
 
-      <Card className="mb-3">
-        <CardBody>
-          <div className={`alert alert-${won ? 'success' : 'primary'} mb-3`} role="status">
-            {message}
-          </div>
-
-          {!won && (
-            <div className="mb-3">
-              <div className="d-flex justify-content-between small text-muted">
-                <span>Rango posible</span>
-                <span>
-                  {low} - {high}
-                </span>
+      <Row className="g-4">
+        {/* Izquierda: parte interactiva */}
+        <Col md="7">
+          <Card className="play-card h-100">
+            <CardBody className="d-flex flex-column">
+              <div className={`message ${won ? 'message--won' : ''}`} role="status">
+                {message}
               </div>
-              <div className="range-track" role="img" aria-label={`Rango posible de ${low} a ${high}`}>
-                <div className="range-fill" style={{ left: `${fillStart}%`, width: `${fillWidth}%` }} />
+
+              {!won && (
+                <div className="mb-4">
+                  <div className="d-flex justify-content-between small fw-semibold mb-1">
+                    <span>Rango posible</span>
+                    <span>
+                      {low} - {high}
+                    </span>
+                  </div>
+                  <div className="range-track" role="img" aria-label={`Rango posible de ${low} a ${high}`}>
+                    <div className="range-fill" style={{ left: `${fillStart}%`, width: `${fillWidth}%` }} />
+                  </div>
+                </div>
+              )}
+
+              <GuessForm
+                onGuess={handleGuess}
+                triedNumbers={history.map((attempt) => attempt.value)}
+                won={won}
+                loading={loading}
+              />
+
+              {error && (
+                <div className="fd-error" role="alert">
+                  {error}
+                </div>
+              )}
+
+              <div className="play-footer mt-auto pt-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                  Intentos fallidos <Badge color="dark">{failedAttempts}</Badge>
+                  {won && (
+                    <span className="ms-3">
+                      Lo lograste en <strong>{history.length}</strong>{' '}
+                      {history.length === 1 ? 'intento' : 'intentos'}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  color={won ? 'success' : 'dark'}
+                  outline={!won}
+                  onClick={() => startNewGame()}
+                  disabled={loading}
+                >
+                  {won ? 'Jugar de nuevo' : 'Nuevo número'}
+                </Button>
               </div>
-            </div>
-          )}
-
-          <GuessForm
-            onGuess={handleGuess}
-            triedNumbers={history.map((attempt) => attempt.value)}
-            won={won}
-            loading={loading}
-          />
-
-          {error && (
-            <Alert color="danger" className="mt-3 mb-0" fade={false} role="alert">
-              {error}
-            </Alert>
-          )}
-        </CardBody>
-      </Card>
-
-      <Row className="align-items-center mb-3">
-        <Col>
-          Intentos fallidos <Badge color="secondary">{failedAttempts}</Badge>
-          {won && (
-            <span className="ms-3">
-              Lo lograste en <strong>{history.length}</strong> {history.length === 1 ? 'intento' : 'intentos'}
-            </span>
-          )}
+            </CardBody>
+          </Card>
         </Col>
-        <Col xs="auto">
-          <Button color={won ? 'success' : 'outline-secondary'} onClick={() => startNewGame()} disabled={loading}>
-            {won ? 'Jugar de nuevo' : 'Nuevo número'}
-          </Button>
+
+        {/* Derecha: historial */}
+        <Col md="5">
+          <GuessHistory history={history} />
         </Col>
       </Row>
-
-      <GuessHistory history={history} />
     </Container>
   );
 }

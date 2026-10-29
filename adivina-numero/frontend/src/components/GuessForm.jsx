@@ -53,7 +53,7 @@ function GuessForm({ onGuess, triedNumbers, won, loading }) {
     <Form onSubmit={handleSubmit} noValidate>
       <FormGroup>
         <Label for="guess">Tu número</Label>
-        <InputGroup>
+        <InputGroup size="lg">
           <Input
             id="guess"
             type="number"

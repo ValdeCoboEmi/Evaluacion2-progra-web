@@ -1,9 +1,10 @@
-import { Badge, ListGroup, ListGroupItem } from 'reactstrap';
+import { useEffect, useRef } from 'react';
+import { Badge, Card, CardHeader, ListGroup, ListGroupItem } from 'reactstrap';
 
 const RESULT_INFO = {
-  mayor: { label: 'El número es mayor', color: 'info' },
-  menor: { label: 'El número es menor', color: 'warning' },
-  correcto: { label: 'Correcto', color: 'success' },
+  mayor: { label: 'Es mayor', arrow: '▲' },
+  menor: { label: 'Es menor', arrow: '▼' },
+  correcto: { label: 'Correcto', arrow: '✓' },
 };
 
 /**
@@ -11,33 +12,50 @@ const RESULT_INFO = {
  * history: [{ value: number, result: 'mayor' | 'menor' | 'correcto' }]
  */
 function GuessHistory({ history }) {
+  const scrollRef = useRef(null);
+
+  // Mantiene visible el último intento cuando la lista crece
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (element) element.scrollTop = element.scrollHeight;
+  }, [history.length]);
+
   return (
-    <section aria-label="Historial de intentos">
-      <h2 className="h5">Historial</h2>
+    <Card className="history-card h-100" aria-label="Historial de intentos">
+      <CardHeader className="d-flex justify-content-between align-items-center">
+        <h2 className="h5 mb-0">Historial</h2>
+        <Badge color="dark" pill>
+          {history.length}
+        </Badge>
+      </CardHeader>
 
       {history.length === 0 ? (
-        <p className="text-muted mb-0">Todavía no has probado ningún número.</p>
+        <p className="history-empty">Todavía no has probado ningún número.</p>
       ) : (
-        <ListGroup>
-          {history.map((attempt, index) => {
-            const info = RESULT_INFO[attempt.result];
+        <div className="history-scroll" ref={scrollRef}>
+          <ListGroup flush>
+            {history.map((attempt, index) => {
+              const info = RESULT_INFO[attempt.result];
 
-            return (
-              <ListGroupItem
-                key={`${index}-${attempt.value}`}
-                className="d-flex justify-content-between align-items-center"
-              >
-                <span>
-                  <span className="text-muted me-2">#{index + 1}</span>
-                  <strong className="fs-5">{attempt.value}</strong>
-                </span>
-                <Badge color={info.color}>{info.label}</Badge>
-              </ListGroupItem>
-            );
-          })}
-        </ListGroup>
+              return (
+                <ListGroupItem
+                  key={`${index}-${attempt.value}`}
+                  className={`attempt attempt--${attempt.result} d-flex justify-content-between align-items-center`}
+                >
+                  <span>
+                    <span className="attempt-index me-2">#{index + 1}</span>
+                    <strong className="attempt-value">{attempt.value}</strong>
+                  </span>
+                  <span className={`result-badge result-badge--${attempt.result}`}>
+                    <span aria-hidden="true">{info.arrow}</span> {info.label}
+                  </span>
+                </ListGroupItem>
+              );
+            })}
+          </ListGroup>
+        </div>
       )}
-    </section>
+    </Card>
   );
 }
 

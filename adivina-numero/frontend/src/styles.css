@@ -1,12 +1,67 @@
+:root {
+  --fd-verde: #82b34a; /* Verde Fresco: sustentabilidad / sin desperdicio */
+  --fd-naranja: #ee7a31; /* Naranja Dinámico: tiempo / acción / apetito */
+  --fd-azul: #0f2d51; /* Azul Marino: tecnología / confianza */
+  --fd-amarillo: #e1bb50; /* Amarillo Arena: presupuesto / calidez */
+  --fd-blanco-roto: #f9f6ea; /* Blanco Roto: balance */
+
+  /* Tema de Bootstrap: los componentes (Badge, Alert, etc.) toman estos colores */
+  --bs-body-bg: var(--fd-blanco-roto);
+  --bs-body-color: var(--fd-azul);
+  --bs-dark-rgb: 15, 45, 81;
+  --bs-success-rgb: 130, 179, 74;
+  --bs-warning-rgb: 225, 187, 80;
+  --bs-warning-bg-subtle: #f8efd2;
+  --bs-warning-border-subtle: var(--fd-amarillo);
+  --bs-warning-text-emphasis: #5c4a10;
+
+  /* Derivados de la paleta para elementos de la interfaz */
+  --fd-azul-suave: rgba(15, 45, 81, 0.14); /* bordes y separadores */
+  --fd-superficie: #fffdf7; /* fondo de tarjetas, un punto más claro que el blanco roto */
+  --fd-naranja-texto: #a8470c; /* naranja oscurecido para texto legible sobre claro */
+
+  --bs-card-bg: var(--fd-superficie);
+  --bs-card-border-color: var(--fd-azul-suave);
+  --bs-card-cap-bg: rgba(15, 45, 81, 0.04);
+  --bs-border-color: var(--fd-azul-suave);
+  --bs-form-invalid-color: var(--fd-naranja-texto);
+  --bs-form-invalid-border-color: var(--fd-naranja);
+}
+
+/* ---------- Página ---------- */
 .game {
-  max-width: 36rem;
+  max-width: 64rem;
+}
+
+.game-title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  padding-bottom: 0.5rem;
+  border-bottom: 4px solid var(--fd-verde);
+  display: inline-block;
+}
+
+/* ---------- Columna izquierda: juego ---------- */
+.message {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--bs-border-radius);
+  background: var(--fd-azul);
+  color: var(--fd-blanco-roto);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.message--won {
+  background: var(--fd-verde);
+  color: var(--fd-azul);
 }
 
 .range-track {
   position: relative;
-  height: 10px;
-  margin-top: 0.25rem;
-  background: var(--bs-gray-200);
+  height: 12px;
+  background: var(--fd-azul-suave);
   border-radius: 999px;
 }
 
@@ -14,9 +69,139 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  background: var(--bs-primary);
+  background: var(--fd-verde);
   border-radius: 999px;
   transition: left 0.3s ease, width 0.3s ease;
+}
+
+.play-footer {
+  border-top: 1px solid var(--fd-azul-suave);
+}
+
+.fd-error {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fdeedf;
+  border: 1px solid var(--fd-naranja);
+  border-left-width: 5px;
+  border-radius: var(--bs-border-radius);
+  color: var(--fd-azul);
+  font-weight: 600;
+}
+
+/* Botón principal (Probar): naranja de acción con texto azul legible */
+.btn-primary {
+  --bs-btn-color: var(--fd-azul);
+  --bs-btn-bg: var(--fd-naranja);
+  --bs-btn-border-color: var(--fd-naranja);
+  --bs-btn-hover-color: var(--fd-azul);
+  --bs-btn-hover-bg: #f58f4e;
+  --bs-btn-hover-border-color: #f58f4e;
+  --bs-btn-active-color: var(--fd-azul);
+  --bs-btn-active-bg: #d96b24;
+  --bs-btn-active-border-color: #d96b24;
+  --bs-btn-disabled-color: var(--fd-azul);
+  --bs-btn-disabled-bg: var(--fd-naranja);
+  --bs-btn-disabled-border-color: var(--fd-naranja);
+  font-weight: 700;
+}
+
+/* "Nuevo número": contorno azul marino */
+.btn-outline-dark {
+  --bs-btn-color: var(--fd-azul);
+  --bs-btn-border-color: var(--fd-azul);
+  --bs-btn-hover-color: var(--fd-blanco-roto);
+  --bs-btn-hover-bg: var(--fd-azul);
+  --bs-btn-hover-border-color: var(--fd-azul);
+  --bs-btn-active-color: var(--fd-blanco-roto);
+  --bs-btn-active-bg: var(--fd-azul);
+  --bs-btn-active-border-color: var(--fd-azul);
+  --bs-btn-disabled-color: var(--fd-azul);
+  --bs-btn-disabled-border-color: var(--fd-azul);
+}
+
+/* "Jugar de nuevo": verde fresco */
+.btn-success {
+  --bs-btn-color: var(--fd-azul);
+  --bs-btn-bg: var(--fd-verde);
+  --bs-btn-border-color: var(--fd-verde);
+  --bs-btn-hover-color: var(--fd-azul);
+  --bs-btn-hover-bg: #93c05e;
+  --bs-btn-hover-border-color: #93c05e;
+  --bs-btn-active-color: var(--fd-azul);
+  --bs-btn-active-bg: #72a13c;
+  --bs-btn-active-border-color: #72a13c;
+  --bs-btn-disabled-color: var(--fd-azul);
+  --bs-btn-disabled-bg: var(--fd-verde);
+  --bs-btn-disabled-border-color: var(--fd-verde);
+  font-weight: 700;
+}
+
+.form-control {
+  background-color: #fff;
+  color: var(--fd-azul);
+  border-color: var(--fd-azul);
+}
+
+.form-control:focus {
+  background-color: #fff;
+  color: var(--fd-azul);
+  border-color: var(--fd-naranja);
+  box-shadow: 0 0 0 0.25rem rgba(238, 122, 49, 0.3);
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+/* ---------- Columna derecha: historial ---------- */
+.history-card .card-header {
+  border-bottom: 1px solid var(--fd-azul-suave);
+}
+
+.history-scroll {
+  /* si hay muchos intentos, la lista hace scroll en lugar de alargar la página */
+  max-height: min(60vh, 32rem);
+  overflow-y: auto;
+}
+
+.history-empty {
+  margin: 0;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.attempt {
+  background: transparent;
+  color: var(--fd-azul);
+  border-left: 6px solid transparent;
+}
+
+.attempt--mayor { border-left-color: var(--fd-amarillo); }
+.attempt--menor { border-left-color: var(--fd-naranja); }
+.attempt--correcto { border-left-color: var(--fd-verde); background: rgba(130, 179, 74, 0.14); }
+
+.attempt-index { opacity: 0.6; font-size: 0.9rem; }
+.attempt-value { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+
+.result-badge {
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--fd-azul);
+  white-space: nowrap;
+}
+
+.result-badge--mayor { background: var(--fd-amarillo); }
+.result-badge--menor { background: var(--fd-naranja); }
+.result-badge--correcto { background: var(--fd-verde); }
+
+/* ---------- Accesibilidad ---------- */
+:focus-visible {
+  outline: 3px solid var(--fd-naranja);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
