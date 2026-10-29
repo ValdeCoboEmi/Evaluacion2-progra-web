@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const { guess, reset } = require('../controllers/guessController');
 
 const router = Router();
 
@@ -8,5 +9,11 @@ router.get('/health', (req, res) => {
 });
 
 // TODO: registrar aquí las rutas del proyecto
+// POST /api/guess -> compara el intento con el número oculto
+router.post('/guess', guess);
+
+// POST /api/reset -> genera un nuevo número oculto
+router.post('/reset', reset);
+
 
 module.exports = router;
