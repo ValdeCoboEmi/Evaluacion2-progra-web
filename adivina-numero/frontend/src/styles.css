@@ -30,7 +30,7 @@
 
 /* ---------- Página ---------- */
 .game {
-  max-width: 64rem;
+  max-width: 70rem;
 }
 
 .game-title {
@@ -60,7 +60,7 @@
 
 .range-track {
   position: relative;
-  height: 12px;
+  height: 20px;
   background: var(--fd-azul-suave);
   border-radius: 999px;
 }
@@ -75,7 +75,7 @@
 }
 
 .play-footer {
-  border-top: 1px solid var(--fd-azul-suave);
+  border-top: 5px solid var(--fd-azul-suave);
 }
 
 .fd-error {
@@ -91,7 +91,7 @@
 
 /* Botón principal (Probar): naranja de acción con texto azul legible */
 .btn-primary {
-  --bs-btn-color: var(--fd-azul);
+  --bs-btn-color: var(--fd-blanco-roto);
   --bs-btn-bg: var(--fd-naranja);
   --bs-btn-border-color: var(--fd-naranja);
   --bs-btn-hover-color: var(--fd-azul);
@@ -103,6 +103,7 @@
   --bs-btn-disabled-color: var(--fd-azul);
   --bs-btn-disabled-bg: var(--fd-naranja);
   --bs-btn-disabled-border-color: var(--fd-naranja);
+  --bs-btn-border-radius: 2.75rem;
   font-weight: 700;
 }
 
@@ -151,7 +152,7 @@
 }
 
 .form-label {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* ---------- Columna derecha: historial ---------- */
