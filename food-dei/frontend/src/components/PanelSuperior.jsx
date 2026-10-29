@@ -1,9 +1,11 @@
-import { Badge, Navbar, NavbarBrand } from 'reactstrap';
+import { Badge, Button, Navbar, NavbarBrand } from 'reactstrap';
 import Temporizador from './Temporizador';
 
+// Formatea un número como dinero: 25 -> "$25.00"
 const moneda = (valor) => `$${Number(valor).toFixed(2)}`;
 
-function PanelSuperior({ saldo, total, estado, expiraEn, onExpira }) {
+// Panel fijo: logo, saldo disponible, total de la reserva, tiempo restante y reinicio total.
+function PanelSuperior({ saldo, total, estado, expiraEn, onExpira, onRestablecer }) {
   return (
     <Navbar light sticky="top" container="lg" className="panel-superior shadow-sm">
       <NavbarBrand href="/" className="me-auto">
@@ -21,6 +23,9 @@ function PanelSuperior({ saldo, total, estado, expiraEn, onExpira }) {
           </Badge>
         </span>
         <Temporizador expiraEn={expiraEn} estado={estado} onExpira={onExpira} />
+        <Button color="outline-secondary" size="sm" onClick={onRestablecer}>
+          Empezar desde cero
+        </Button>
       </div>
     </Navbar>
   );

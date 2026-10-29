@@ -37,5 +37,6 @@ router.post('/reserva/confirmar', reservaController.confirmarReserva);
 
 // inicia una reserva nueva cuando la anterior expiró o fue confirmada ----
 router.post('/reserva/reiniciar', reservaController.reiniciar);
+router.post('/reserva/restablecer', reservaController.restablecer);
 
 module.exports = router;

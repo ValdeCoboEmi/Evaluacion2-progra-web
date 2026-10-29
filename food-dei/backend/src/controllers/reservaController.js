@@ -165,4 +165,25 @@ function reiniciar(req, res, next) {
   }
 }
 
-module.exports = { getReserva, agregarItem, actualizarPorciones, eliminarItem, confirmarReserva, reiniciar };
+// POST /api/reserva/restablecer
+//  200 OK -> todo vuelve a empezar: saldo inicial, stock inicial y reserva nueva
+function restablecer(req, res, next) {
+  try {
+    reservaService.restablecerTodo();
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Todo se restableció desde cero.',
+      reserva: reservaService.obtenerVistaReserva(),
+    });
+  } catch (error) {
+    return manejarError(
+      error,
+      'POST /api/reserva/restablecer',
+      'No se pudo restablecer el sistema. Intenta de nuevo.',
+      next,
+    );
+  }
+}
+
+module.exports = { getReserva, agregarItem, actualizarPorciones, eliminarItem, confirmarReserva, reiniciar, restablecer };

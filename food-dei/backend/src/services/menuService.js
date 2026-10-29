@@ -1,7 +1,7 @@
 const { crearError } = require('../utils/errores');
 
 // Inventario en memoria. Lo comparte reservaService.
-const menu = [
+const menuInicial = [
   { id: 101, nombre: 'Menú Ejecutivo (Pollo)', precio: 5.5, stock: 12, categoria: 'Fuerte' },
   { id: 102, nombre: 'Pasta Alfredo', precio: 4.75, stock: 8, categoria: 'Fuerte' },
   { id: 103, nombre: 'Ensalada César', precio: 3.25, stock: 5, categoria: 'Entrada' },
@@ -18,6 +18,9 @@ const menu = [
   { id: 114, nombre: 'Brownie con Helado', precio: 3.0, stock: 7, categoria: 'Postre' },
   { id: 115, nombre: 'Camarones al Ajillo', precio: 7.25, stock: 5, categoria: 'Fuerte' }
 ];
+
+// copia del inicial, para poder volver a los valores de fábrica.
+const menu = menuInicial.map((plato) => ({ ...plato }));
 
 // Devuelve una COPIA del menú
 function obtenerMenu() {
@@ -58,6 +61,14 @@ function tomarStock(id, cantidad) {
 }
 
 // Rollback: vuelve el stock al valor de una copia previa obtenida con obtenerMenu().
+// Restablece el stock de todos los platos a su valor inicial (reinicio total).
+function restablecerMenu() {
+  menuInicial.forEach((original) => {
+    const plato = buscarPlato(original.id);
+    if (plato) plato.stock = original.stock;
+  });
+}
+
 function restaurarMenu(copia) {
   copia.forEach((platoCopia) => {
     const plato = buscarPlato(platoCopia.id);
@@ -65,4 +76,4 @@ function restaurarMenu(copia) {
   });
 }
 
-module.exports = { obtenerMenu, buscarPlato, devolverStock, tomarStock, restaurarMenu };
+module.exports = { obtenerMenu, buscarPlato, devolverStock, tomarStock, restaurarMenu, restablecerMenu };

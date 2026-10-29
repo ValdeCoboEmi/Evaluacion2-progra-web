@@ -21,7 +21,7 @@ const moneda = (valor) => `$${Number(valor).toFixed(2)}`;
 //  onConfirmar() -> POST /reserva/confirmar (bloquea el stock y descuenta el saldo)
 //  onReiniciar() -> inicia una reserva nueva cuando la anterior expiró o fue confirmada
 function Bandeja({
-  items, estado, cargando, quitandoId, actualizandoId, confirmando,
+  items, total, saldo, estado, cargando, quitandoId, actualizandoId, confirmando,
   onQuitar, onCambiarPorciones, onReiniciar, onConfirmar,
 }) {
   // true mientras haya una petición en curso (evita clics repetidos)
@@ -120,6 +120,16 @@ function Bandeja({
       {/* Confirmar: solo aparece si hay platos en la reserva */}
       {!cargando && items.length > 0 && (
         <CardBody>
+          {/* Resumen: así el usuario ve cuánto lleva sin mirar el panel superior */}
+          <div className="d-flex justify-content-between mb-1">
+            <span>Total de tu reserva</span>
+            <strong>{moneda(total)}</strong>
+          </div>
+          <div className="d-flex justify-content-between text-muted mb-3">
+            <span>Saldo disponible</span>
+            <span>{moneda(saldo)}</span>
+          </div>
+
           <Button color="success" block disabled={ocupado} onClick={onConfirmar}>
             {confirmando ? <Spinner size="sm" /> : 'Confirmar reserva'}
           </Button>

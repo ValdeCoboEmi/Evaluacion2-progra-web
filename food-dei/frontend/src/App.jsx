@@ -180,6 +180,25 @@ function App() {
     }
   };
 
+  // POST /api/reserva/restablecer. Vuelve todo a cero: saldo inicial, stock inicial, reserva nueva.
+// Se pide confirmación porque borra el progreso actual.
+const restablecerTodo = async () => {
+  if (!window.confirm('¿Restablecer todo desde cero? Se pierde tu reserva y el saldo vuelve a su valor inicial.')) {
+    return;
+  }
+
+  setError(null);
+
+  try {
+    const resultado = await request('/reserva/restablecer', { method: 'POST' });
+
+    aplicarReserva(resultado.reserva);
+    setMenu(await request('/menu'));
+  } catch (fallo) {
+    mostrarError(fallo.message);
+  }
+};
+
   // Une cada ítem de la reserva ({ id, cantidad }) con los datos del menú.
   const itemsDetallados = reserva.itemsReservados.map((item) => {
     const plato = menu.find((candidato) => candidato.id === item.id);
@@ -199,6 +218,7 @@ function App() {
         estado={reserva.estado}
         expiraEn={expiraEn}
         onExpira={manejarExpiracion}
+        onRestablecer={restablecerTodo}
       />
 
       <Container className="py-3">
@@ -217,6 +237,8 @@ function App() {
           <Col xs="12" lg="4">
             <Bandeja
               items={itemsDetallados}
+              total={reserva.total}
+              saldo={reserva.saldo}
               estado={reserva.estado}
               cargando={cargando}
               quitandoId={quitandoId}

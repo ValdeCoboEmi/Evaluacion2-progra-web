@@ -110,6 +110,15 @@ function confirmarReserva() {
   });
 }
 
+// Reinicio TOTAL: vuelve todo al estado de fábrica.
+// Saldo = SALDO_INICIAL, stock del menú = inicial, reserva vacía y con el tiempo reiniciado.
+function restablecerTodo() {
+  menuService.restablecerMenu();
+  reserva.saldoInicial = SALDO_INICIAL;
+  reserva.items = [];
+  iniciarVentanaDeTiempo();
+}
+
 // Inicia una reserva nueva. Si había ítems activos, devuelve sus unidades al stock.
 function reiniciarReserva() {
   ejecutarAtomico(() => {
@@ -228,6 +237,7 @@ function eliminarItem(id) {
 iniciarVentanaDeTiempo();
 
 module.exports = {
+  restablecerTodo,
   confirmarReserva,
   liberarSiExpirada,
   reiniciarReserva,
